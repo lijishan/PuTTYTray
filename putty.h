@@ -1297,6 +1297,10 @@ void printer_job_data(printer_job *, void *, int);
 void printer_finish_job(printer_job *);
 
 /*
+ * Exports from wincom.c
+ */
+int open_port(char *port_name);
+/*
  * Exports from cmdline.c (and also cmdline_error(), which is
  * defined differently in various places and required _by_
  * cmdline.c).

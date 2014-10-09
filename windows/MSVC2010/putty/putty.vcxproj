@@ -95,6 +95,7 @@
     <ClCompile Include="..\..\..\windows\winutils.c" />
     <ClCompile Include="..\..\..\windows\winx11.c" />
     <ClCompile Include="..\..\..\x11fwd.c" />
+    <ClCompile Include="..\..\wincom.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\charset\charset.h" />
