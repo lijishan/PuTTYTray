@@ -79,13 +79,13 @@ BOOL setup_DCB(HANDLE hd, int rate_arg)
 BOOL setup_timeout(HANDLE hd,
                     DWORD readInterval,
 		    DWORD readTotalMultiplier,
-		    DWORD readTotalconstant,
+		    DWORD readTotalConstant,
 		    DWORD writeTotalMultiplier,
 		    DWORD writeTotalConstant)               
 {
     COMMTIMEOUTS timeouts;
     timeouts.ReadIntervalTimeout = readInterval; //读间隔超时
-    timeouts.ReadTotalTimeoutConstant = readTotalconstant; //读超时常量
+    timeouts.ReadTotalTimeoutConstant = readTotalConstant; //读超时常量
     timeouts.ReadTotalTimeoutMultiplier = readTotalMultiplier; //读时间系数
     timeouts.WriteTotalTimeoutConstant = writeTotalConstant; // 写超时常量
     timeouts.WriteTotalTimeoutMultiplier = writeTotalMultiplier; //写时间系数, 总超时的计算公式是：总超时＝时间系数×要求读/写的字符数＋时间常量
@@ -95,15 +95,20 @@ BOOL setup_timeout(HANDLE hd,
 	return TRUE;
 }  
   
-read_char(HANDLE hd)
+read_char(HANDLE hd, BYTE* buff, DWORD *len)
 {
     BOOL  bRead = TRUE;
-  BOOL  bResult = TRUE;
-  DWORD dwError = 0;
-  DWORD BytesRead = 0;
-  char RXBuff;
-  for (;;)
-  {
+    BOOL  bResult = TRUE;
+    DWORD dwError = 0;
+    DWORD BytesRead = 0;
+    DWORD rlen = 0;
+    char ch;
+    COMSTAT comstat;
+    OVERLAPPED m_ov;
+    memset(&m_ov, 0, sizeof(m_ov));
+    for (;;)
+    {
+        //memset(&comstat, 0, sizeof(comstat));
 	// 在使用ReadFile 函数进行读操作前，应先使用ClearCommError函数清除错误
         bResult = ClearCommError(hd, &dwError, &comstat);
 	if (comstat.cbInQue == 0)// COMSTAT结构返回串口状态信息
@@ -111,45 +116,49 @@ read_char(HANDLE hd)
   	    continue;
   	if (bRead)
   	{
-  	  bResult = ReadFile(hd, // Handle to COMM port串口的句柄
-              	  &RXBuff,	// RX Buffer Pointer
-                   		// 读入的数据存储的地址，即读入的数据将存
-  						// 储在以该指针的值为首地址的一片内存区
-  				  1,		// 读取一个字节
-  				  &BytesRead,	// Stores number of bytes read, 指向一个DWORD
-       					//数值，该数值返回读操作实际读入的字节数
-  				  &m_ov);	// 重叠操作时，该参数指向一个OVERLAPPED结构，同步操作时，该参数为NULL
-            printf("%c",RXBuff);
+  	    bResult = ReadFile(hd, &ch, 1, &BytesRead, &m_ov);
+            if (ch == '\r' || ch == '\n')
+            {
+                break;
+            }
+            if (BytesRead == 1)
+            {
+                buff[rlen++] = ch;
+                if (rlen >= *len)
+                    break;
+            }
+
 	    if (!bResult)// 当ReadFile和WriteFile返回FALSE时，不一定就是操作失败，线程应该调用GetLastError函数分析返回的结果
   	    {
   	        switch (dwError = GetLastError())
   	        {
-  	          case ERROR_IO_PENDING:
-  	          {
+  	            case ERROR_IO_PENDING:
+  	            {
   	            bRead = FALSE;
   	            break;
-  	          }
-  	          default:
-  	          {
+  	            }
+  	            default:
+  	            {
   	            break;
-  	          }
-  	          }
+  	            }
+  	            }
   	    }
   	    else
   	    {
-  	       bRead = TRUE;
-  	     }
+  	        bRead = TRUE;
+  	        }
   	}  
         // close if (bRead)
   	if (!bRead)
   	{
   	    bRead = TRUE;
   	    bResult = GetOverlappedResult(hd,	// Handle to COMM port
-  					  &m_ov,	// Overlapped structure
-  				          &BytesRead,		// Stores number of bytes read
-  					  TRUE); 			// Wait flag
-  	 }
-  }
+  					    &m_ov,	// Overlapped structure
+  				            &BytesRead,		// Stores number of bytes read
+  					    TRUE); 			// Wait flag
+  	    }
+    }
+    *len = rlen;
 }
  
 write_char(HANDLE hd, BYTE* m_szWriteBuffer,DWORD m_nToSend)
@@ -157,8 +166,10 @@ write_char(HANDLE hd, BYTE* m_szWriteBuffer,DWORD m_nToSend)
   BOOL bWrite = TRUE;
   BOOL bResult = TRUE;
   DWORD BytesSent = 0;
-  HANDLE	m_hWriteEvent;
-  ResetEvent(m_hWriteEvent);
+  //HANDLE	m_hWriteEvent;
+  OVERLAPPED m_ov;
+  memset(&m_ov, 0, sizeof(m_ov));
+  //ResetEvent(m_hWriteEvent);
   if (bWrite)
   {
       m_ov.Offset = 0;
@@ -225,30 +236,31 @@ write_char(HANDLE hd, BYTE* m_szWriteBuffer,DWORD m_nToSend)
 }
   
 
-BOOL write_com(int port, BYTE* buff, DWORD len)
+BOOL write_comm(int port, BYTE* buff, DWORD len, BYTE* rbuff, DWORD *rlen)
 {
-    BOOL ok;
     HANDLE hComm;
-    sprintf(port_name, "COM%d", term->esc_args[0]);
-    if (!(hComm = open_port(port_name)))
+    char name[32];
+    sprintf(name, "COM%d", port);
+    if (!(hComm = open_comm(name)))
     {
-        printf("ERROR: Can't open port %s.", port_name);
+        printf("ERROR: Can't open port %s.", name);
         return FALSE;
     }
-    if (!setup_DCB(4800))
+    if (!setup_DCB(hComm, 4800))
     {
         printf("ERROR: Setup DCB failed.");
         return FALSE;
     }
-    if (!setup_timeout(0,0,0,0,0))
+    if (!setup_timeout(hComm, 0,0,3,0,0))
     {
         printf("ERROR: Setup timeout failed.");
         return FALSE;
     }
     PurgeComm(hComm, PURGE_RXCLEAR | PURGE_TXCLEAR | PURGE_RXABORT | PURGE_TXABORT);
-    write_char("please send data now",20);
+    write_char(hComm, buff, len);
     printf("received data:\n");
-  read_char();
+    read_char(hComm, rbuff, rlen);
+    CloseHandle(hComm);
     return TRUE;
 }
 

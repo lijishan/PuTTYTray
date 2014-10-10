@@ -3591,15 +3591,20 @@ static void term_out(Terminal *term)
 			compatibility(VT100);
 			{
 			    char buf[32];
-			    char port_name[6];
+			    char cmd[6];
+                            char recv_buff[32];
+                            int  recv_len = 32;
 			    BOOL ok;
                             int len;
-			    len = sprintf(port_name, "COM%d", term->esc_args[0]);
-                            ok = write_com(term->esc_args[0], port_name, len);
+			    len = sprintf(cmd, "some_command");
+                            ok = write_comm(term->esc_args[0], cmd, len, recv_buff, &recv_len);
                             //ok = open_port(port_name);
 			    if (ok)
-				sprintf(buf, "99904111111\n", term->esc_args[0]);
-			    else
+                            {
+                                recv_buff[recv_len] = '\0';
+				sprintf(buf, "%s\n", recv_buff);
+                            }
+                            else
 				sprintf(buf, "failed to open com #%d\n", term->esc_args[0]);
 			    ldisc_send(term->ldisc, buf, strlen(buf), 1);
 			}
