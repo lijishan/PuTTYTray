@@ -243,7 +243,6 @@ BOOL write_comm(int port, BYTE* buff, DWORD len, BYTE* rbuff, DWORD *rlen)
     }
     PurgeComm(hComm, PURGE_RXCLEAR | PURGE_TXCLEAR | PURGE_RXABORT | PURGE_TXABORT);
     write_char(hComm, buff, len);
-    printf("received data:\n");
     read_char(hComm, rbuff, rlen);
     CloseHandle(hComm);
     return TRUE;
