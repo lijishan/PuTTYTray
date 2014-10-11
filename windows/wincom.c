@@ -36,38 +36,38 @@ BOOL setup_DCB(HANDLE hd, int rate_arg)
     {
         return FALSE;
     }
-  /* -------------------------------------------------------------------- */
-  // set DCB to configure the serial port
-  dcb.DCBlength       = sizeof(dcb);
-  /* ---------- Serial Port Config ------- */
+    /* -------------------------------------------------------------------- */
+    // set DCB to configure the serial port
+    dcb.DCBlength       = sizeof(dcb);
+    /* ---------- Serial Port Config ------- */
     dcb.BaudRate        = rate;
     dcb.Parity      = NOPARITY;
-  dcb.fParity     = 0;
-  dcb.StopBits        = ONESTOPBIT;
-  dcb.ByteSize        = 8;
-  dcb.fOutxCtsFlow    = 0;
-  dcb.fOutxDsrFlow    = 0;
-  dcb.fDtrControl     = DTR_CONTROL_DISABLE;
-  dcb.fDsrSensitivity = 0;
-  dcb.fRtsControl     = RTS_CONTROL_DISABLE;
-  dcb.fOutX           = 0;
-  dcb.fInX            = 0;
-  /* ----------------- misc parameters ----- */
-  dcb.fErrorChar      = 0;
-  dcb.fBinary         = 1;
-  dcb.fNull           = 0;
-  dcb.fAbortOnError   = 0;
-  dcb.wReserved       = 0;
-  dcb.XonLim          = 2;
-  dcb.XoffLim         = 4;
-  dcb.XonChar         = 0x13;
-  dcb.XoffChar        = 0x19;
-  dcb.EvtChar         = 0;
-  /* -------------------------------------------------------------------- */
-  // set DCB
-  if(!SetCommState(hd, &dcb))
+    dcb.fParity     = 0;
+    dcb.StopBits        = ONESTOPBIT;
+    dcb.ByteSize        = 8;
+    dcb.fOutxCtsFlow    = 0;
+    dcb.fOutxDsrFlow    = 0;
+    dcb.fDtrControl     = DTR_CONTROL_DISABLE;
+    dcb.fDsrSensitivity = 0;
+    dcb.fRtsControl     = RTS_CONTROL_DISABLE;
+    dcb.fOutX           = 0;
+    dcb.fInX            = 0;
+    /* ----------------- misc parameters ----- */
+    dcb.fErrorChar      = 0;
+    dcb.fBinary         = 1;
+    dcb.fNull           = 0;
+    dcb.fAbortOnError   = 0;
+    dcb.wReserved       = 0;
+    dcb.XonLim          = 2;
+    dcb.XoffLim         = 4;
+    dcb.XonChar         = 0x13;
+    dcb.XoffChar        = 0x19;
+    dcb.EvtChar         = 0;
+    /* -------------------------------------------------------------------- */
+    // set DCB
+    if(!SetCommState(hd, &dcb))
     return FALSE;
-  else
+    else
     return TRUE;
 }
   
@@ -128,25 +128,25 @@ read_char(HANDLE hd, BYTE* buff, DWORD *len)
                     break;
             }
 
-	    if (!bResult)// 当ReadFile和WriteFile返回FALSE时，不一定就是操作失败，线程应该调用GetLastError函数分析返回的结果
+	    if (!bResult)
   	    {
   	        switch (dwError = GetLastError())
   	        {
   	            case ERROR_IO_PENDING:
   	            {
-  	            bRead = FALSE;
-  	            break;
+  	                bRead = FALSE;
+  	                break;
   	            }
   	            default:
   	            {
-  	            break;
+  	                break;
   	            }
-  	            }
+  	        }
   	    }
   	    else
   	    {
   	        bRead = TRUE;
-  	        }
+  	    }
   	}  
         // close if (bRead)
   	if (!bRead)
@@ -161,7 +161,7 @@ read_char(HANDLE hd, BYTE* buff, DWORD *len)
     *len = rlen;
 }
  
-write_char(HANDLE hd, BYTE* m_szWriteBuffer,DWORD m_nToSend)
+write_char(HANDLE hd, BYTE* m_szWriteBuffer, DWORD m_nToSend)
 {
   BOOL bWrite = TRUE;
   BOOL bResult = TRUE;
@@ -175,22 +175,7 @@ write_char(HANDLE hd, BYTE* m_szWriteBuffer,DWORD m_nToSend)
       m_ov.Offset = 0;
       m_ov.OffsetHigh = 0;
       // Clear buffer
-      bResult = WriteFile(hd,	// Handle to COMM Port, 串口的句柄
-  
-  		       m_szWriteBuffer,	// Pointer to message buffer in calling finction
-                    // 即以该指针的值为首地址的nNumberOfBytesToWrite
-                                 // 个字节的数据将要写入串口的发送数据缓冲区
-  
-  		       m_nToSend,	// Length of message to send, 要写入的数据的字节数
-  
-  		       &BytesSent,	 // Where to store the number of bytes sent
-                  // 指向指向一个DWORD数值，该数值返回实际写入的字节数
-              
-  		       &m_ov );	    // Overlapped structure
-                  // 重叠操作时，该参数指向一个OVERLAPPED结构，
-                            // 同步操作时，该参数为NULL
-      // 当ReadFile和WriteFile返回FALSE时，不一定就是操作失
-   //败，线程应该调用GetLastError函数分析返回的结果
+      bResult = WriteFile(hd, m_szWriteBuffer, m_nToSend, &BytesSent, &m_ov);
       if (!bResult)  
     {
         DWORD dwError = GetLastError();
@@ -246,7 +231,7 @@ BOOL write_comm(int port, BYTE* buff, DWORD len, BYTE* rbuff, DWORD *rlen)
         printf("ERROR: Can't open port %s.", name);
         return FALSE;
     }
-    if (!setup_DCB(hComm, 4800))
+    if (!setup_DCB(hComm, 9600))
     {
         printf("ERROR: Setup DCB failed.");
         return FALSE;

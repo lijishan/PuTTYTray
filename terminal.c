@@ -3590,15 +3590,18 @@ static void term_out(Terminal *term)
 		      case 'v': /* Read from com <term->esc_args[0]> */
 			compatibility(VT100);
 			{
-			    char buf[32];
-			    char cmd[6];
+                            char buf[64];
+			    char cmd[32];
                             char recv_buff[32];
                             int  recv_len = 32;
 			    BOOL ok;
-                            int len;
-			    len = sprintf(cmd, "some_command");
-                            ok = write_comm(term->esc_args[0], cmd, len, recv_buff, &recv_len);
-                            //ok = open_port(port_name);
+                            int i;
+                            memset(cmd, 0, sizeof(cmd));
+                            for (i = 0; i < term->esc_nargs - 1; i++)
+                            {
+                                cmd[i] = term->esc_args[i + 1];
+                            }
+                            ok = write_comm(term->esc_args[0], cmd, term->esc_nargs - 1, recv_buff, &recv_len);
 			    if (ok)
                             {
                                 recv_buff[recv_len] = '\0';
