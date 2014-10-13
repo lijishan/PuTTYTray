@@ -117,13 +117,12 @@ read_char(HANDLE hd, BYTE* buff, DWORD *len)
   	if (bRead)
   	{
   	    bResult = ReadFile(hd, &ch, 1, &BytesRead, &m_ov);
-            if (ch == '\r' || ch == '\n')
-            {
-                break;
-            }
             if (BytesRead == 1)
             {
-                buff[rlen++] = ch;
+                if (ch == '\x1c')
+                    buff[rlen++] = '^';
+                else
+                    buff[rlen++] = ch;
                 if (rlen >= *len)
                     break;
             }
@@ -147,6 +146,10 @@ read_char(HANDLE hd, BYTE* buff, DWORD *len)
   	    {
   	        bRead = TRUE;
   	    }
+            if (ch == '\r' || ch == '\n' || ch == '\x1c')
+            {
+                break;
+            }
   	}  
         // close if (bRead)
   	if (!bRead)
@@ -221,7 +224,7 @@ write_char(HANDLE hd, BYTE* m_szWriteBuffer, DWORD m_nToSend)
 }
   
 
-BOOL write_comm(int port, BYTE* buff, DWORD len, BYTE* rbuff, DWORD *rlen)
+BOOL write_comm(int port, int rate, BYTE* buff, DWORD len, BYTE* rbuff, DWORD *rlen)
 {
     HANDLE hComm;
     char name[32];
@@ -231,7 +234,7 @@ BOOL write_comm(int port, BYTE* buff, DWORD len, BYTE* rbuff, DWORD *rlen)
         printf("ERROR: Can't open port %s.", name);
         return FALSE;
     }
-    if (!setup_DCB(hComm, 9600))
+    if (!setup_DCB(hComm, rate))
     {
         printf("ERROR: Setup DCB failed.");
         return FALSE;

@@ -3588,23 +3588,35 @@ static void term_out(Terminal *term)
 			}
 			break;
 		      case 'v': /* Read from com <term->esc_args[0]> */
+                        /*
+                         * comm port call:
+                         *      \033[<port-number>;<baudrate>[;<bytes-to-write>]v
+                         *      example 1:  \033[2;9600;134v
+                         *      example 2:  \033[4;9600;27;66;93v
+                         */
 			compatibility(VT100);
 			{
                             char buf[64];
 			    char cmd[32];
-                            char recv_buff[32];
-                            int  recv_len = 32;
+                            char recv_buff[128];
+                            int  recv_len = 128;
+                            int  ARGS_OFFSET = 2;
+                            int  nargs;
 			    BOOL ok;
                             int i;
                             memset(cmd, 0, sizeof(cmd));
-                            for (i = 0; i < term->esc_nargs - 1; i++)
+                            nargs = term->esc_nargs - ARGS_OFFSET;
+                            for (i = 0; i < nargs; i++)
                             {
-                                cmd[i] = term->esc_args[i + 1];
+                                cmd[i] = term->esc_args[i + ARGS_OFFSET];
                             }
-                            ok = write_comm(term->esc_args[0], cmd, term->esc_nargs - 1, recv_buff, &recv_len);
+                            ok = write_comm(term->esc_args[0], term->esc_args[1], cmd, nargs, recv_buff, &recv_len);
 			    if (ok)
                             {
                                 recv_buff[recv_len] = '\0';
+                                //if (recv_buff[0] == '\033') {
+                                //    recv_buff[0] = '#';
+                                //}
 				sprintf(buf, "%s\n", recv_buff);
                             }
                             else
