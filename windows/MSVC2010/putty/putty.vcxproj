@@ -14,6 +14,7 @@
     <ClCompile Include="..\..\..\adb.c" />
     <ClCompile Include="..\..\..\be_all_s.c" />
     <ClCompile Include="..\..\..\cmdline.c" />
+    <ClCompile Include="..\..\..\comlib.c" />
     <ClCompile Include="..\..\..\conf.c" />
     <ClCompile Include="..\..\..\config.c" />
     <ClCompile Include="..\..\..\cproxy.c" />
@@ -99,6 +100,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\charset\charset.h" />
+    <ClInclude Include="..\..\..\comlib.h" />
     <ClInclude Include="..\..\..\dialog.h" />
     <ClInclude Include="..\..\..\int64.h" />
     <ClInclude Include="..\..\..\ldisc.h" />

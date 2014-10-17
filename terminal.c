@@ -10,7 +10,7 @@
 #include <assert.h>
 #include "putty.h"
 #include "terminal.h"
-
+#include "comlib.h"
 /*
  * HACK: PuttyTray / Nutty
  */ 
@@ -3596,13 +3596,13 @@ static void term_out(Terminal *term)
                          */
 			compatibility(VT100);
 			{
-                            char buf[64];
-			    char cmd[32];
-                            char recv_buff[128];
-                            int  recv_len = 128;
-                            int  ARGS_OFFSET = 2;
+                            unsigned char buf[129];
+			    unsigned char cmd[32];
+                            unsigned char state[4];
+                            unsigned char recv_buff[64];
+                            int  recv_len = 64;
+                            int  ARGS_OFFSET = 4;
                             int  nargs;
-			    BOOL ok;
                             int i;
                             memset(cmd, 0, sizeof(cmd));
                             nargs = term->esc_nargs - ARGS_OFFSET;
@@ -3610,18 +3610,27 @@ static void term_out(Terminal *term)
                             {
                                 cmd[i] = term->esc_args[i + ARGS_OFFSET];
                             }
-                            ok = write_comm(term->esc_args[0], term->esc_args[1], cmd, nargs, recv_buff, &recv_len);
-			    if (ok)
+                            recv_len = CommCall(term->esc_args[0], term->esc_args[1], 
+                                                cmd, nargs, recv_buff, recv_len, 
+                                                term->esc_args[2], term->esc_args[3]*1000);
+			    if (recv_len > 0)
                             {
-                                recv_buff[recv_len] = '\0';
-                                //if (recv_buff[0] == '\033') {
-                                //    recv_buff[0] = '#';
-                                //}
-				sprintf(buf, "%s\n", recv_buff);
+                                sprintf(buf, "1B%02x", recv_len);
                             }
-                            else
-				sprintf(buf, "failed to open com #%d\n", term->esc_args[0]);
-			    ldisc_send(term->ldisc, buf, strlen(buf), 1);
+                            else if (recv_len == ERROR_COMM_TIMEOUT)
+                            {
+                                sprintf(buf, "1C00");
+                            }
+                            else 
+                            {
+                                sprintf(buf, "FF00");
+                            }
+                            for (i = 0; i < recv_len; i++)
+                            {
+                                sprintf(buf + 4 + i * 2, "%02x", recv_buff[i]);
+                            }
+			    ldisc_send(term->ldisc, buf, strlen(buf), 0);
+                            ldisc_send(term->ldisc, "\r", 1, 1);
 			}
 			break;
 		      case 'l':       /* RM: toggle modes to low */

@@ -81,7 +81,7 @@ BOOL setup_timeout(HANDLE hd,
 		    DWORD readTotalMultiplier,
 		    DWORD readTotalConstant,
 		    DWORD writeTotalMultiplier,
-		    DWORD writeTotalConstant)               
+		    DWORD writeTotalConstant)
 {
     COMMTIMEOUTS timeouts;
     timeouts.ReadIntervalTimeout = readInterval; //读间隔超时
@@ -102,27 +102,25 @@ read_char(HANDLE hd, BYTE* buff, DWORD *len)
     DWORD dwError = 0;
     DWORD BytesRead = 0;
     DWORD rlen = 0;
-    char ch;
+    char ch = 0;
     COMSTAT comstat;
     OVERLAPPED m_ov;
     memset(&m_ov, 0, sizeof(m_ov));
     for (;;)
     {
-        //memset(&comstat, 0, sizeof(comstat));
-	// 在使用ReadFile 函数进行读操作前，应先使用ClearCommError函数清除错误
         bResult = ClearCommError(hd, &dwError, &comstat);
-	if (comstat.cbInQue == 0)// COMSTAT结构返回串口状态信息
-    	    //本文只用到了cbInQue成员变量，该成员变量的值代表输入缓冲区的字节数
+	if (comstat.cbInQue == 0)
   	    continue;
+        // can't hold so much data
+        if (comstat.cbInQue > len - rlen)
+            break;
   	if (bRead)
   	{
-  	    bResult = ReadFile(hd, &ch, 1, &BytesRead, &m_ov);
-            if (BytesRead == 1)
+  	    bResult = ReadFile(hd, buff+rlen, comstat.cbInQue, &BytesRead, &m_ov);
+            if (BytesRead > 0)
             {
-                if (ch == '\x1c')
-                    buff[rlen++] = '^';
-                else
-                    buff[rlen++] = ch;
+                rlen += BytesRead;
+                ch = buff[rlen - 1];
                 if (rlen >= *len)
                     break;
             }
@@ -211,7 +209,7 @@ write_char(HANDLE hd, BYTE* m_szWriteBuffer, DWORD m_nToSend)
       // deal with the error code
       if (!bResult)
       {
-      printf("GetOverlappedResults() in WriteFile()");
+        printf("GetOverlappedResults() in WriteFile()");
       }
   } // end if (!bWrite)
   
@@ -239,7 +237,7 @@ BOOL write_comm(int port, int rate, BYTE* buff, DWORD len, BYTE* rbuff, DWORD *r
         printf("ERROR: Setup DCB failed.");
         return FALSE;
     }
-    if (!setup_timeout(hComm, 0,0,3,0,0))
+    if (!setup_timeout(hComm, 0,0,0,0,0))
     {
         printf("ERROR: Setup timeout failed.");
         return FALSE;
@@ -251,13 +249,3 @@ BOOL write_comm(int port, int rate, BYTE* buff, DWORD len, BYTE* rbuff, DWORD *r
     return TRUE;
 }
 
-/*
-void   main()
-{
-    int open;
-    open = open_port("COM2");
-    if(open)
-	printf("open comport success");
-    system("pause") ;
-}
-*/
