@@ -3613,7 +3613,7 @@ static void term_out(Terminal *term)
                             recv_len = CommCall(term->esc_args[0], term->esc_args[1], 
                                                 cmd, nargs, recv_buff, recv_len, 
                                                 term->esc_args[2], term->esc_args[3]*1000);
-			    if (recv_len > 0)
+			    if (recv_len >= 0)
                             {
                                 sprintf(buf, "1B%02x", recv_len);
                             }
@@ -3623,7 +3623,7 @@ static void term_out(Terminal *term)
                             }
                             else 
                             {
-                                sprintf(buf, "FF00");
+                                sprintf(buf, "FF%02x", 0-recv_len);
                             }
                             for (i = 0; i < recv_len; i++)
                             {
