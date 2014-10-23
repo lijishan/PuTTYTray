@@ -177,7 +177,7 @@ struct terminal_tag {
     int alt_which;
     int alt_sblines; /* # of lines on alternate screen that should be used for scrollback. */
 
-#define ARGS_MAX 32		       /* max # of esc sequence arguments */
+#define ARGS_MAX 256		       /* max # of esc sequence arguments */
 #define ARG_DEFAULT 0		       /* if an arg isn't specified */
 #define def(a,d) ( (a) == ARG_DEFAULT ? (d) : (a) )
     int esc_args[ARGS_MAX];
