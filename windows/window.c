@@ -320,7 +320,7 @@ static void start_backend(void)
      */
     back = backend_from_proto(conf_get_int(conf, CONF_protocol));
     if (back == NULL) {
-	char *str = dupprintf("%s Internal Error", appname);
+	char *str = dupprintf("%s 内部错误", appname);
 	MessageBox(NULL, "Unsupported protocol number found",
 		   str, MB_OK | MB_ICONEXCLAMATION);
 	sfree(str);
@@ -390,7 +390,7 @@ static void close_session(void)
     int i;
 
     session_closed = TRUE;
-    sprintf(morestuff, "%.70s (inactive)", appname);
+    sprintf(morestuff, "%.70s (无响应)", appname);
     set_icon(NULL, morestuff);
     set_title(NULL, morestuff);
 
@@ -446,7 +446,8 @@ int putty_main(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 
     hinst = inst;
     hwnd = NULL;
-    flags = FLAG_VERBOSE | FLAG_INTERACTIVE;
+    //flags = FLAG_VERBOSE | FLAG_INTERACTIVE;
+	flags = FLAG_INTERACTIVE;
 
     sk_init();
 
@@ -458,8 +459,8 @@ int putty_main(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 
     if (!init_winver())
     {
-	char *str = dupprintf("%s Fatal Error", appname);
-	MessageBox(NULL, "Windows refuses to report a version",
+	char *str = dupprintf("%s 致命错误", appname);
+	MessageBox(NULL, "无法获知Windows版本",
 		   str, MB_OK | MB_ICONEXCLAMATION);
 	sfree(str);
 	return 1;
@@ -488,8 +489,8 @@ int putty_main(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
      */
     hr = CoInitialize(NULL);
     if (hr != S_OK && hr != S_FALSE) {
-        char *str = dupprintf("%s Fatal Error", appname);
-	MessageBox(NULL, "Failed to initialize COM subsystem",
+        char *str = dupprintf("%s 致命错误", appname);
+	MessageBox(NULL, "无法初始化 COM 子系统",
 		   str, MB_OK | MB_ICONEXCLAMATION);
 	sfree(str);
 	return 1;
@@ -610,7 +611,7 @@ int putty_main(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 				       "If you hit No, uninstallation will proceed, but\n"
 				       "saved sessions etc will be left on the machine.",
 				       appname);
-			s2 = dupprintf("%s Uninstallation", appname);
+			s2 = dupprintf("%s 卸载", appname);
 		    } else {
 			s1 = dupprintf("This procedure will remove ALL Registry entries\n"
 				       "associated with %s, and will also remove\n"
@@ -620,7 +621,7 @@ int putty_main(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 				       "THIS PROCESS WILL DESTROY YOUR SAVED SESSIONS.\n"
 				       "Are you really sure you want to continue?",
 				       appname);
-			s2 = dupprintf("%s Warning", appname);
+			s2 = dupprintf("%s 警告", appname);
 		    }
 		    if (message_box(s1, s2,
 				    MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2,
@@ -966,7 +967,7 @@ int putty_main(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
 	    if (has_help())
 		AppendMenu(m, MF_ENABLED, IDM_HELP, "&Help");
-	    str = dupprintf("&About %s", appname);
+	    str = dupprintf("关于(&A) %s", appname);
 	    AppendMenu(m, MF_ENABLED, IDM_ABOUT, str);
 	    sfree(str);
 	}
@@ -1142,7 +1143,7 @@ char *do_select(SOCKET skt, int startup)
 	  case WSAENETDOWN:
 	    return "Network is down";
 	  default:
-	    return "WSAAsyncSelect(): unknown error";
+	    return "WSAAsyncSelect(): unknown 错误";
 	}
     }
     return NULL;
@@ -1385,7 +1386,7 @@ void connection_fatal(void *frontend, char *fmt, ...)
         term_data(term, TRUE, stuff, strlen(stuff));
         PostMessage(hwnd, WM_NOTIFY_RECONNECT, 0, 0);
     } else {
-        sprintf(morestuff, "%.70s Fatal Error", appname);
+        sprintf(morestuff, "%.70s 致命错误", appname);
         MessageBox(hwnd, stuff, morestuff, MB_ICONERROR | MB_OK);
 
         if (conf_get_int(conf, CONF_close_on_exit) == FORCE_ON)
@@ -1409,7 +1410,7 @@ void cmdline_error(char *fmt, ...)
     va_start(ap, fmt);
     stuff = dupvprintf(fmt, ap);
     va_end(ap);
-    sprintf(morestuff, "%.70s Command Line Error", appname);
+    sprintf(morestuff, "%.70s 命令行错误", appname);
     MessageBox(hwnd, stuff, morestuff, MB_ICONERROR | MB_OK);
     sfree(stuff);
     exit(1);
@@ -2296,10 +2297,10 @@ void notify_remote_exit(void *fe)
 	    must_close_session = TRUE;
 	    session_closed = TRUE;
 	    /* exitcode == INT_MAX indicates that the connection was closed
-	     * by a fatal error, so an error box will be coming our way and
+	     * by a 致命错误, so an error box will be coming our way and
 	     * we should not generate this informational one. */
 	    if (exitcode != INT_MAX)
-		MessageBox(hwnd, "Connection closed by remote host",
+		MessageBox(hwnd, "连接被服务器断开",
 			   appname, MB_OK | MB_ICONINFORMATION);
 	}
     }
@@ -2365,10 +2366,10 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message,
 	{
 	    char *str;
 	    show_mouseptr(1);
-	    str = dupprintf("%s Exit Confirmation", appname);
+	    str = dupprintf("%s退出前确认", appname);
 	    if (session_closed || !conf_get_int(conf, CONF_warn_on_close) ||
 		MessageBox(hwnd,
-			   "Are you sure you want to close this session?",
+			   "确定要关闭窗口吗？所有未保存操作都将会丢失。",
 			   str, MB_ICONWARNING | MB_OKCANCEL | MB_DEFBUTTON1)
 		== IDOK)
 		DestroyWindow(hwnd);
@@ -6006,7 +6007,7 @@ void fatalbox(char *fmt, ...)
     va_start(ap, fmt);
     stuff = dupvprintf(fmt, ap);
     va_end(ap);
-    sprintf(morestuff, "%.70s Fatal Error", appname);
+    sprintf(morestuff, "%.70s 致命错误", appname);
     MessageBox(hwnd, stuff, morestuff, MB_ICONERROR | MB_OK);
     sfree(stuff);
     cleanup_exit(1);
@@ -6023,7 +6024,7 @@ void modalfatalbox(char *fmt, ...)
     va_start(ap, fmt);
     stuff = dupvprintf(fmt, ap);
     va_end(ap);
-    sprintf(morestuff, "%.70s Fatal Error", appname);
+    sprintf(morestuff, "%.70s 致命错误", appname);
     MessageBox(hwnd, stuff, morestuff,
 	       MB_SYSTEMMODAL | MB_ICONERROR | MB_OK);
     sfree(stuff);
@@ -6041,7 +6042,7 @@ void nonfatal(char *fmt, ...)
     va_start(ap, fmt);
     stuff = dupvprintf(fmt, ap);
     va_end(ap);
-    sprintf(morestuff, "%.70s Error", appname);
+    sprintf(morestuff, "%.70s 错误", appname);
     MessageBox(hwnd, stuff, morestuff, MB_ICONERROR | MB_OK);
     sfree(stuff);
 }
@@ -6162,7 +6163,7 @@ void do_beep(void *frontend, int mode)
 	    char otherbuf[100];
 	    sprintf(buf, "Unable to play sound file\n%s\n"
 		    "Using default sound instead", bell_wavefile->path);
-	    sprintf(otherbuf, "%.70s Sound Error", appname);
+	    sprintf(otherbuf, "%.70s Sound 错误", appname);
 	    MessageBox(hwnd, buf, otherbuf,
 		       MB_OK | MB_ICONEXCLAMATION);
 	    conf_set_int(conf, CONF_beep, BELL_DEFAULT);
