@@ -1300,7 +1300,7 @@ static struct Packet *ssh1_rdpkt(Ssh ssh, unsigned char **data, int *datalen)
 
     if (ssh->cipher && detect_attack(ssh->crcda_ctx, st->pktin->data,
 				     st->biglen, NULL)) {
-        bombout(("Network attack (CRC compensation) detected!"));
+        bombout(("检测到网络攻击(CRC compensation)!"));
 	ssh_free_packet(st->pktin);
         crStop(NULL);
     }
@@ -1311,7 +1311,7 @@ static struct Packet *ssh1_rdpkt(Ssh ssh, unsigned char **data, int *datalen)
     st->realcrc = crc32_compute(st->pktin->data, st->biglen - 4);
     st->gotcrc = GET_32BIT(st->pktin->data + st->biglen - 4);
     if (st->gotcrc != st->realcrc) {
-	bombout(("Incorrect CRC received on packet"));
+	bombout(("在数据包中接收到到错误的CRC"));
 	ssh_free_packet(st->pktin);
 	crStop(NULL);
     }
@@ -1325,7 +1325,7 @@ static struct Packet *ssh1_rdpkt(Ssh ssh, unsigned char **data, int *datalen)
 	if (!zlib_decompress_block(ssh->sc_comp_ctx,
 				   st->pktin->body - 1, st->pktin->length + 1,
 				   &decompblk, &decomplen)) {
-	    bombout(("Zlib decompression encountered invalid data"));
+	    bombout(("无效数据导致Zlib解压失败"));
 	    ssh_free_packet(st->pktin);
 	    crStop(NULL);
 	}
@@ -1453,7 +1453,7 @@ static struct Packet *ssh2_rdpkt(Ssh ssh, unsigned char **data, int *datalen)
                  st->packetlen-4))
 		    break;
 	    if (st->packetlen >= OUR_V2_PACKETLIMIT) {
-		bombout(("No valid incoming packet found"));
+		bombout(("接收到到无效的数据包"));
 		ssh_free_packet(st->pktin);
 		crStop(NULL);
 	    }	    
@@ -2994,9 +2994,9 @@ static int ssh_closing(Plug plug, const char *error_msg, int error_code,
 
     if (!error_msg) {
 	if (!ssh->close_expected)
-	    error_msg = "Server unexpectedly closed network connection";
+	    error_msg = "服务器异常断开了网络连接";
 	else
-	    error_msg = "Server closed network connection";
+	    error_msg = "服务器断开了网络连接";
     }
 
     if (ssh->close_expected && ssh->clean_exit && ssh->exitcode < 0)
