@@ -2595,9 +2595,11 @@ static void term_print_setup(Terminal *term, char *printer)
 	char *str;
     bufchain_clear(&term->printer_buf);
     term->print_job = printer_start_job(printer);
-	str = dupprintf("%s 不能正确启动打印任务，请检查打印配置", printer);
-	MessageBox(NULL, str, "打印错误", MB_OK | MB_ICONEXCLAMATION);
-	sfree(str);
+	if (!term->print_job) {
+		str = dupprintf("%s 不能正确启动打印任务，请检查打印配置", printer);
+		MessageBox(NULL, str, "打印错误", MB_OK | MB_ICONEXCLAMATION);
+		sfree(str);
+	}
 }
 static void term_print_flush(Terminal *term)
 {

@@ -360,7 +360,7 @@ static tree234 *errstrings = NULL;
 
 char *winsock_error_string(int error)
 {
-    const char prefix[] = "Network error: ";
+    const char prefix[] = "网络错误: ";
     struct errstring *es;
 
     /*
@@ -369,76 +369,76 @@ char *winsock_error_string(int error)
      */
     switch (error) {
       case WSAEACCES:
-	return "Network error: Permission denied";
+	return "网络错误: 权限被拒绝";
       case WSAEADDRINUSE:
-	return "Network error: Address already in use";
+	return "网络错误: 地址已被占用";
       case WSAEADDRNOTAVAIL:
-	return "Network error: Cannot assign requested address";
+	return "网络错误: 无法分配请求的地址";
       case WSAEAFNOSUPPORT:
 	return
-	    "Network error: Address family not supported by protocol family";
+	    "网络错误: 不支持指定的地址族";
       case WSAEALREADY:
-	return "Network error: Operation already in progress";
+	return "网络错误: 操作已在进行中";
       case WSAECONNABORTED:
-	return "Network error: Software caused connection abort";
+	return "网络错误: 软件造成连接中断";
       case WSAECONNREFUSED:
-	return "Network error: Connection refused";
+	return "网络错误: 连接被拒绝";
       case WSAECONNRESET:
-	return "Network error: Connection reset by peer";
+	return "网络错误: 连接被重置";
       case WSAEDESTADDRREQ:
-	return "Network error: Destination address required";
+	return "网络错误: 需要提供目标地址";
       case WSAEFAULT:
-	return "Network error: Bad address";
+	return "网络错误: 不合法的地址";
       case WSAEHOSTDOWN:
-	return "Network error: Host is down";
+	return "网络错误: 服务器已关闭";
       case WSAEHOSTUNREACH:
-	return "Network error: No route to host";
+	return "网络错误: 没有路由主机";
       case WSAEINPROGRESS:
-	return "Network error: Operation now in progress";
+	return "网络错误: 操作正在进行中";
       case WSAEINTR:
-	return "Network error: Interrupted function call";
+	return "网络错误: 被中断的调用";
       case WSAEINVAL:
-	return "Network error: Invalid argument";
+	return "网络错误: 无效参数";
       case WSAEISCONN:
-	return "Network error: Socket is already connected";
+	return "网络错误: 套接字已连接";
       case WSAEMFILE:
-	return "Network error: Too many open files";
+	return "网络错误: 打开的文件太多";
       case WSAEMSGSIZE:
-	return "Network error: Message too long";
+	return "网络错误: 消息太长";
       case WSAENETDOWN:
-	return "Network error: Network is down";
+	return "网络错误: 网络已经断开";
       case WSAENETRESET:
-	return "Network error: Network dropped connection on reset";
+	return "网络错误: 网络连接丢失";
       case WSAENETUNREACH:
-	return "Network error: Network is unreachable";
+	return "网络错误: 网络不可达";
       case WSAENOBUFS:
-	return "Network error: No buffer space available";
+	return "网络错误: 无可用的缓冲空间";
       case WSAENOPROTOOPT:
-	return "Network error: Bad protocol option";
+	return "网络错误: 无效的协议选项";
       case WSAENOTCONN:
-	return "Network error: Socket is not connected";
+	return "网络错误: 套接字连接未建立";
       case WSAENOTSOCK:
-	return "Network error: Socket operation on non-socket";
+	return "网络错误: Socket指令被应用在非套接字上";
       case WSAEOPNOTSUPP:
-	return "Network error: Operation not supported";
+	return "网络错误: 操作不支持";
       case WSAEPFNOSUPPORT:
-	return "Network error: Protocol family not supported";
+	return "网络错误: 协议族不被支持";
       case WSAEPROCLIM:
-	return "Network error: Too many processes";
+	return "网络错误: 太多的进程";
       case WSAEPROTONOSUPPORT:
-	return "Network error: Protocol not supported";
+	return "网络错误: 协议不被支持";
       case WSAEPROTOTYPE:
-	return "Network error: Protocol wrong type for socket";
+	return "网络错误: 错误的套接字协议类型";
       case WSAESHUTDOWN:
-	return "Network error: Cannot send after socket shutdown";
+	return "网络错误: 不能在套接字关闭后发送";
       case WSAESOCKTNOSUPPORT:
-	return "Network error: Socket type not supported";
+	return "网络错误: 套接字类型不被支持";
       case WSAETIMEDOUT:
-	return "Network error: Connection timed out";
+	return "网络错误: 连接超时";
       case WSAEWOULDBLOCK:
-	return "Network error: Resource temporarily unavailable";
+	return "网络错误: 资源临时不可用";
       case WSAEDISCON:
-	return "Network error: Graceful shutdown in progress";
+	return "网络错误: 正在优雅的关闭";
     }
 
     /*

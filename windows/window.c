@@ -372,13 +372,13 @@ static void start_backend(void)
     for (i = 0; i < lenof(popup_menus); i++) {
 	DeleteMenu(popup_menus[i].menu, IDM_RESTART, MF_BYCOMMAND);
         InsertMenu(popup_menus[i].menu, IDM_DUPSESS, MF_BYCOMMAND | MF_ENABLED,
-	    IDM_RESTART, "&Restart Session");
+	    IDM_RESTART, "重新连接");
     }
     must_close_session = FALSE;
     session_closed = FALSE;
 
     if (error) {
-        connection_fatal(term, "Unable to open connection to\r\n"
+        connection_fatal(term, "不能连接到\r\n"
 		"%.800s\r\n" "%s", conf_dest(conf), error);
     }
 
@@ -413,7 +413,7 @@ static void close_session(void)
     for (i = 0; i < lenof(popup_menus); i++) {
 	DeleteMenu(popup_menus[i].menu, IDM_RESTART, MF_BYCOMMAND);
 	InsertMenu(popup_menus[i].menu, IDM_DUPSESS, MF_BYCOMMAND | MF_ENABLED,
-		   IDM_RESTART, "&Restart Session");
+		   IDM_RESTART, "重新连接");
     }
 
     /*
@@ -939,34 +939,40 @@ int putty_main(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 	for (j = 0; j < lenof(popup_menus); j++) {
 	    m = popup_menus[j].menu;
 
+	    //AppendMenu(m, MF_SEPARATOR, 0, 0);
+	    //AppendMenu(m, MF_ENABLED, IDM_SHOWLOG, "&Event Log");
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
-	    AppendMenu(m, MF_ENABLED, IDM_SHOWLOG, "&Event Log");
-	    AppendMenu(m, MF_SEPARATOR, 0, 0);
-	    AppendMenu(m, MF_ENABLED, IDM_NEWSESS, "Ne&w Session...");
-	    AppendMenu(m, MF_ENABLED, IDM_DUPSESS, "&Duplicate Session");
+	    //AppendMenu(m, MF_ENABLED, IDM_NEWSESS, "Ne&w Session...");
+	    //AppendMenu(m, MF_ENABLED, IDM_DUPSESS, "&Duplicate Session");
+		//AppendMenu(m, MF_ENABLED, IDM_DUPSESS, "&Duplicate Session");
+	    //AppendMenu(m, MF_POPUP | MF_ENABLED, (UINT) savedsess_menu,
+		//       "Sa&ved Sessions");
 	    AppendMenu(m, MF_POPUP | MF_ENABLED, (UINT) savedsess_menu,
-		       "Sa&ved Sessions");
-	    AppendMenu(m, MF_ENABLED, IDM_RECONF, "Chan&ge Settings...");
+		       "已存会话(&V)");
+	    //AppendMenu(m, MF_ENABLED, IDM_RECONF, "Chan&ge Settings...");
+		AppendMenu(m, MF_ENABLED, IDM_RECONF, "修改设置(&G)...");
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
-	    AppendMenu(m, MF_ENABLED, IDM_COPYALL, "C&opy All to Clipboard");
-	    AppendMenu(m, MF_ENABLED, IDM_CLRSB, "C&lear Scrollback");
-	    AppendMenu(m, MF_ENABLED, IDM_RESET, "Rese&t Terminal");
+	    //AppendMenu(m, MF_ENABLED, IDM_COPYALL, "C&opy All to Clipboard");
+	    //AppendMenu(m, MF_ENABLED, IDM_CLRSB, "C&lear Scrollback");
+	    //AppendMenu(m, MF_ENABLED, IDM_RESET, "Rese&t Terminal");
+	    AppendMenu(m, MF_ENABLED, IDM_COPYALL, "全部拷贝");
+	    AppendMenu(m, MF_ENABLED, IDM_RESET, "刷新终端");
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
 	    AppendMenu(m, (conf_get_int(conf, CONF_resize_action)
 			   == RESIZE_DISABLED) ? MF_GRAYED : MF_ENABLED,
-		       IDM_FULLSCREEN, "&Full Screen");
+		       IDM_FULLSCREEN, "全屏(&F)");
 
-            AppendMenu(m, MF_POPUP | MF_ENABLED, (UINT) url_menu, "&Urls");
+        //AppendMenu(m, MF_POPUP | MF_ENABLED, (UINT) url_menu, "&Urls");
 
-            if (conf_get_int(conf, CONF_alwaysontop)) {
-                AppendMenu(m, MF_ENABLED | MF_CHECKED, IDM_VISIBLE, "Alwa&ys on top");
-            } else {
-                AppendMenu(m, MF_ENABLED | MF_UNCHECKED, IDM_VISIBLE, "Alwa&ys on top");
-            }
+        if (conf_get_int(conf, CONF_alwaysontop)) {
+            AppendMenu(m, MF_ENABLED | MF_CHECKED, IDM_VISIBLE, "总是在最前面");
+        } else {
+            AppendMenu(m, MF_ENABLED | MF_UNCHECKED, IDM_VISIBLE, "总是在最前面");
+        }
 
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
 	    if (has_help())
-		AppendMenu(m, MF_ENABLED, IDM_HELP, "&Help");
+		AppendMenu(m, MF_ENABLED, IDM_HELP, "帮助");
 	    str = dupprintf("关于(&A) %s", appname);
 	    AppendMenu(m, MF_ENABLED, IDM_ABOUT, str);
 	    sfree(str);
@@ -1227,6 +1233,8 @@ void update_specials_menu(void *frontend)
 {
     HMENU new_menu;
     int i, j;
+
+	return;  // hide this menu.
 
     if (back)
 	specials = back->get_specials(backhandle);
