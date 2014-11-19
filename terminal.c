@@ -2592,8 +2592,12 @@ static void do_osc(Terminal *term)
  */
 static void term_print_setup(Terminal *term, char *printer)
 {
+	char *str;
     bufchain_clear(&term->printer_buf);
     term->print_job = printer_start_job(printer);
+	str = dupprintf("%s 不能正确启动打印任务，请检查打印配置", printer);
+	MessageBox(NULL, str, "打印错误", MB_OK | MB_ICONEXCLAMATION);
+	sfree(str);
 }
 static void term_print_flush(Terminal *term)
 {
@@ -3574,13 +3578,12 @@ static void term_out(Terminal *term)
 			{
 			    char *printer;
 			    if (term->esc_nargs != 1) break;
-			    if (term->esc_args[0] == 5 && 
-				(printer = conf_get_str(term->conf,
-							CONF_printer))[0]) {
-				term->printing = TRUE;
-				term->only_printing = !term->esc_query;
-				term->print_state = 0;
-				term_print_setup(term, printer);
+			    if (term->esc_args[0] == 5) {
+					printer = conf_get_str(term->conf, CONF_printer);
+					term->printing = TRUE;
+					term->only_printing = !term->esc_query;
+					term->print_state = 0;
+					term_print_setup(term, printer);
 			    } else if (term->esc_args[0] == 4 &&
 				       term->printing) {
 				term_print_finish(term);
