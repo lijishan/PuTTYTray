@@ -682,8 +682,8 @@ int do_reconfig(HWND hwnd, int protcfginfo)
     winctrl_init(&ctrls_panel);
     dp_add_tree(&dp, &ctrls_base);
     dp_add_tree(&dp, &ctrls_panel);
-    dp.wintitle = dupprintf("%s Reconfiguration", appname);
-    dp.errtitle = dupprintf("%s Error", appname);
+    dp.wintitle = dupprintf("%s ≈‰÷√", appname);
+    dp.errtitle = dupprintf("%s ¥ÌŒÛ", appname);
     dp.data = conf;
     dlg_auto_set_fixed_pitch_flag(&dp);
     dp.shortcuts['g'] = TRUE;	       /* the treeview: `Cate&gory' */

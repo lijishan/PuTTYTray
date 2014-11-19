@@ -13,8 +13,8 @@ void cygterm_setup_config_box(struct controlbox *b, int midsession)
     union control *c;
     int i;
     struct controlset *s;
-    s = ctrl_getset(b, "Session", "hostport",
-                    "Specify the destination you want to connect to");
+    s = ctrl_getset(b, "高级/会话", "hostport",
+                    "填写你想连接的服务器地址");
     for (i = 0; i < s->ncontrols; i++) {
 	c = s->ctrls[i];
 	if (c->generic.type == CTRL_RADIO &&
@@ -35,9 +35,9 @@ void cygterm_setup_config_box(struct controlbox *b, int midsession)
 	}
     }
     if (!midsession) {
-	ctrl_settitle(b, "Connection/Cygterm",
+	ctrl_settitle(b, "高级/连接/Cygterm",
 	              "Options controlling Cygterm sessions");
-	s = ctrl_getset(b, "Connection/Cygterm", "cygterm",
+	s = ctrl_getset(b, "高级/连接/Cygterm", "cygterm",
 	                "Configure Cygwin paths");
 	ctrl_checkbox(s, "Autodetect Cygwin installation", 'd',
 	              HELPCTX(no_help),

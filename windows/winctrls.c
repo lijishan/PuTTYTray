@@ -2357,13 +2357,13 @@ void dlg_fontsel_set(union control *ctrl, void *dlg, FontSpec *fs)
     fontspec_free((FontSpec *)c->data);
     c->data = fontspec_copy(fs);
 
-    boldstr = (fs->isbold ? "bold, " : "");
+    boldstr = (fs->isbold ? "加粗, " : "");
     if (fs->height == 0)
-	buf = dupprintf("Font: %s, %sdefault height", fs->name, boldstr);
+	buf = dupprintf("字体: %s, %s默认高度", fs->name, boldstr);
     else
-	buf = dupprintf("Font: %s, %s%d-%s", fs->name, boldstr,
+	buf = dupprintf("字体: %s, %s%d-%s", fs->name, boldstr,
 			(fs->height < 0 ? -fs->height : fs->height),
-			(fs->height < 0 ? "pixel" : "point"));
+			(fs->height < 0 ? "像素" : "点"));
     SetDlgItemText(dp->hwnd, c->base_id+1, buf);
     sfree(buf);
 
